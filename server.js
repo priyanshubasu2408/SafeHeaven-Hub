@@ -31,13 +31,38 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+
+// routes 
+
 app.get("/", (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+});
+
+app.get("/signin", (req, res) => {
+    res.sendFile(__dirname + '/public/login.html');
+});
+
+app.get("/signup", (req, res) => {
     res.sendFile(__dirname + '/public/signup.html');
 });
 
-app.get("/public/login.html", (req, res) => {
-    res.sendFile(__dirname + '/public/login.html');
+app.get("/about", (req, res) => {
+    res.sendFile(__dirname + '/public/about.html');
 });
+
+app.get("/contact", (req, res) => {
+    res.sendFile(__dirname + '/public/contact.html');
+});
+
+app.get("/404", (req, res) => {
+    res.sendFile(__dirname + '/public/404.html');
+});
+
+app.use((req, res, next) => {
+    res.redirect('/');
+});
+
+
 
 mongoose.connect(mongourl)
     .then(() => console.log('Connected to MongoDB'))
@@ -79,33 +104,31 @@ app.post('/register', upload.single('file'), async (req, res) => {
 
         await newUser.save();
 
-        res.redirect('/public/index.html'); // Redirect to index.html upon successful registration
+        res.redirect('/signin'); 
     } catch (error) {
         console.error('Error registering user:', error);
         res.status(500).send('Internal Server Error');
     }
 });
 
-app.post('/public/login', bodyParser.urlencoded({ extended: false }), async (req,res)=>{
-    const email1=req.body.email;
-    const password1 = req.body.password;
-    
-    console.log("Username:", email1);
-    console.log("Password:", password1);
+app.post('/login', bodyParser.urlencoded({ extended: false }), async (req, res) => {
+    const { email, password } = req.body;
 
-    User.findOne({ email:email1, password:password1 })
-        .then(newUser => {
-            if (newUser) {
-                res.redirect('/public/index.html');
-            } else {
-                res.status(401).send('Invalid username or password');
-            }
-        })
-        .catch(error => {
-            console.error(error);
-            res.status(500).send('Internal Server Error');
-        });
-})
+    try {
+        const user = await User.findOne({ email, password });
+        if (user) {
+            // Redirect to the home page upon successful login
+            res.redirect('/');
+        } else {
+            // If no user found, redirect to the login page with an error message
+            res.redirect('/404');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 // Start server
 app.listen(PORT, () => {

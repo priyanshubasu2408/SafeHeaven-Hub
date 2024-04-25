@@ -91,3 +91,16 @@
     scrollTo(document.documentElement);
   };
 })();
+
+document.addEventListener("DOMContentLoaded", function() {
+  // Function to hide the element
+  function hideElement() {
+      var element = document.getElementById("ele-to-hide");
+      if (element) {
+          element.style.display = "none";
+      }
+  }
+
+  // Call the function to hide the element
+  hideElement();
+});
